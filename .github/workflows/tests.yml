@@ -1,0 +1,86 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install CPU-only dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy scipy opencv-python-headless pyyaml
+
+      - name: Run unit tests
+        run: |
+          python test_suite.py
+
+      - name: Check for print() statements in production code
+        run: |
+          python - <<'EOF'
+          import ast, os, sys
+          violations = []
+          skip = {"test_suite.py", "system/realtime_setup.py"}
+          for root, dirs, files in os.walk("."):
+              dirs[:] = [d for d in dirs if d not in ("__pycache__", ".git", "venv", ".venv")]
+              for f in files:
+                  if not f.endswith(".py"): continue
+                  rel = os.path.relpath(os.path.join(root, f))
+                  if any(s in rel for s in skip): continue
+                  src = open(rel).read()
+                  tree = ast.parse(src)
+                  for node in ast.walk(tree):
+                      if isinstance(node, ast.Call):
+                          if isinstance(node.func, ast.Name) and node.func.id == "print":
+                              violations.append(f"{rel}:{node.lineno}")
+          if violations:
+              print("print() found in production code:")
+              for v in violations: print(f"  {v}")
+              sys.exit(1)
+          else:
+              print("No print() statements found — OK")
+          EOF
+
+      - name: Check for imports inside functions
+        run: |
+          python - <<'EOF'
+          import ast, os, sys
+          violations = []
+          skip = {"test_suite.py"}
+          for root, dirs, files in os.walk("."):
+              dirs[:] = [d for d in dirs if d not in ("__pycache__", ".git", "venv", ".venv")]
+              for f in files:
+                  if not f.endswith(".py"): continue
+                  rel = os.path.relpath(os.path.join(root, f))
+                  if any(s in rel for s in skip): continue
+                  src = open(rel).read()
+                  tree = ast.parse(src)
+                  for node in ast.walk(tree):
+                      if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                          for child in ast.walk(node):
+                              if child is node: continue
+                              if isinstance(child, (ast.Import, ast.ImportFrom)):
+                                  violations.append(f"{rel}:{child.lineno} (in '{node.name}')")
+          if violations:
+              print("Imports inside functions:")
+              for v in violations: print(f"  {v}")
+              sys.exit(1)
+          else:
+              print("No imports inside functions — OK")
+          EOF

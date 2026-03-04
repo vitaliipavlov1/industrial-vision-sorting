@@ -1,0 +1,27 @@
+# Industrial Vision Sorting System — Python dependencies
+#
+# Install:
+#   pip install -r requirements.txt
+#
+# TensorRT must be installed separately from the NVIDIA SDK:
+#   https://developer.nvidia.com/tensorrt
+#
+# CuPy version must match your CUDA installation:
+#   CUDA 12.x → cupy-cuda12x
+#   CUDA 11.x → cupy-cuda11x
+
+# GPU / CUDA
+cupy-cuda12x>=12.0.0          # Change to cupy-cuda11x for CUDA 11
+
+# Computer Vision
+opencv-python-headless>=4.8.0
+numpy>=1.24.0
+
+# Scientific / Tracking
+scipy>=1.11.0
+
+# Configuration
+pyyaml>=6.0
+
+# Typing (Python 3.10 backport, not needed for 3.11+)
+# typing-extensions>=4.5.0

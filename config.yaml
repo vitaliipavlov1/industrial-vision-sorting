@@ -1,0 +1,150 @@
+# ============================================================
+# CAMERA
+# ============================================================
+
+camera:
+
+  width:  1920
+  height: 1080
+  fps:    120
+
+
+# ============================================================
+# ROI  (conveyor region cropped before inference)
+# ============================================================
+
+roi:
+
+  x:      0
+  y:      200
+  width:  1920
+  height: 600
+
+
+# ============================================================
+# SEGMENTATION
+# ============================================================
+
+segmentation:
+
+  engine_path:   "models/segmentation.engine"
+
+  input_width:   640
+  input_height:  640
+
+  num_classes:   3
+
+  threshold:     0.5
+
+
+# ============================================================
+# CALIBRATION
+# ============================================================
+
+calibration:
+
+  mm_per_pixel: 0.25
+
+
+# ============================================================
+# CLASS CONFIGURATION
+# ============================================================
+
+classes:
+
+  1:
+    name:           "defect"
+    min_area_mm2:   5
+    max_area_mm2:   500
+    min_solidity:   0.7
+    max_elongation: 5.0
+    roi_x_min_mm:   0
+    roi_x_max_mm:   500
+
+  2:
+    name:           "foreign_object"
+    min_area_mm2:   10
+    max_area_mm2:   1000
+    min_solidity:   0.6
+    max_elongation: 6.0
+    roi_x_min_mm:   0
+    roi_x_max_mm:   500
+
+
+# ============================================================
+# TRACKING
+# ============================================================
+
+tracking:
+
+  process_noise:              1.0
+  measurement_noise:          2.0
+
+  base_gating_mm:             30
+
+  max_missed_frames:          5
+
+  # EMA alpha kept for interface compat (Kalman handles smoothing)
+  velocity_smoothing_alpha:   0.5
+
+  # Frames a track must be seen before firing is allowed
+  # Prevents false positives from single-frame noise
+  min_confirmations:          3
+
+
+# ============================================================
+# PREDICTION
+# ============================================================
+
+prediction:
+
+  nozzle_position_mm:           500
+
+  valve_delay_ms:               5
+  air_response_ms:              5
+
+  fire_duration_ms:             20
+
+  min_velocity_mm_s:            100
+
+  safety_margin_ms:             3
+
+  min_distance_mm:              20
+
+  # Use encoder velocity when track velocity is unreliable
+  encoder_velocity_fallback:    true
+
+  # Optional per-class override (class_id: duration_ms)
+  # per_class_duration_ms:
+  #   1: 20
+  #   2: 30
+
+
+# ============================================================
+# SCHEDULER
+# ============================================================
+
+scheduler:
+
+  busy_wait_us: 500
+
+
+# ============================================================
+# SAFETY
+# ============================================================
+
+safety:
+
+  max_latency_ms:       30.0
+
+  frame_timeout_ms:     200.0
+
+  # Seconds after fault before auto-recovery is attempted
+  recovery_timeout_s:   5.0
+
+
+# ============================================================
+# EJECTOR
+# ============================================================
+
+ejector_pin: 17
