@@ -83,12 +83,10 @@ industrial-vision-sorting/
 ├── hardware/
 │   └── ejector.py                  Non-blocking solenoid controller (worker thread)
 │
-├── safety/
-│   ├── latency_monitor.py          p95/p99 latency, pre-allocated circular buffer
-│   └── watchdog.py                 Frame timeout + overload detection + auto-recovery
-│
-└── system/
-    └── realtime_setup.py           OS-level RT: CPU affinity, SCHED_FIFO, mlockall
+└── safety/
+    ├── latency_monitor.py          p95/p99 latency, pre-allocated circular buffer
+    └── watchdog.py                 Frame timeout + overload detection + auto-recovery
+ 
 ```
 
 ---
